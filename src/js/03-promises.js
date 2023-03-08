@@ -5,41 +5,37 @@ const form = document.querySelector('form');
 form.addEventListener('submit', e => {
   e.preventDefault();
 
-  let delay = Number(e.currentTarget.delay.value);
-  const step = Number(e.currentTarget.step.value);
-  const amount = Number(e.currentTarget.amount.value);
-
-  for (let position = 0; position < amount; position++) {
-    createPromise(position, delay)
-      .then(({ position, delay }) => {
-        setTimeout(() => {
-          Notiflix.Notify.success(
-            `Fulfilled promise ${position} in ${delay}ms`,
-            {
-              useIcon: false,
-            }
-          );
-        }, delay);
-      })
-      .catch(({ position, delay }) => {
-        setTimeout(() => {
-          Notiflix.Notify.failure(`Reject promise ${position} in ${delay}ms`, {
-            useIcon: false,
-          });
-        }, delay);
-      });
-    delay += step;
+  const formData = new formData(e.currentTarget);
+  const data = {};
+  formData.forEach((value, key) => {
+    data[key] = Number(value);
+  });
+  let delay = data.delay;
+  for (let i = 0; i < data.amount; i += 1) {
+    showPromice(createPromise(i + 1, delay));
+    delay += data.step;
   }
 });
 
+function showPromice(promise) {
+  promise
+    .then(({ position, delay }) => {
+      Notiflix.Notify.success(`Fulfilled promise ${position} in ${delay}ms`);
+    })
+    .catch(({ position, delay }) => {
+      Notiflix.Notify.failure(`Reject promise ${position} in ${delay}ms`);
+    });
+}
+
 function createPromise(position, delay) {
-  const shouldResolve = Math.random() > 0.3;
-  const objPromise = { position, delay };
-  return new Promise((res, rej) => {
-    if (shouldResolve) {
-      res(objPromise);
-    } else {
-      rej(objPromise);
-    }
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const shouldResolve = Math.random() > 0.3;
+      if (shouldResolve) {
+        resolve({ position, delay });
+      }
+      reject({ position, delay });
+    }, delay);
   });
+  return promise;
 }

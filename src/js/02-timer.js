@@ -48,9 +48,9 @@ function addLeadingZero(value) {
 }
 
 btnStart.addEventListener('click', () => {
+  btnStart.disabled = true;
   let timer = setInterval(() => {
     let countdown = new Date(input.value) - new Date();
-    btnStart.disabled = true;
     input.disabled = true;
     if (countdown >= 0) {
       let timeObject = convertMs(countdown);
